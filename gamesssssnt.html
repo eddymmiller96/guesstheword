@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess That Word</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0d1117; /* Dark background for tech feel */
+            color: #c9d1d9;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: #161b22; /* Slightly lighter dark for container */
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.2); /* Blue glow for tech effect */
+        }
+        h1 {
+            color: #58a6ff; /* Blue accent */
+        }
+        #hint {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        input {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+        }
+        button {
+            background-color: #238636; /* Green for submit */
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2ea44f;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        #score {
+            margin-top: 10px;
+        }
+        .next-btn {
+            background-color: #1f6feb; /* Blue for next */
+        }
+        .next-btn:hover {
+            background-color: #388bfd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Guess That Word</h1>
+        <p id="hint"></p>
+        <input type="text" id="guess" placeholder="Your guess">
+        <button onclick="checkGuess()">Submit</button>
+        <button onclick="newWord()" class="next-btn">Next Word</button>
+        <p id="feedback"></p>
+        <p id="score">Score: 0</p>
+    </div>
+
+    <script>
+        const vocabulary = [
+            {word: "abject", hint: "of the most contemptible kind"},
+            {word: "aberration", hint: "a state or condition markedly different from the norm"},
+            {word: "abjure", hint: "formally reject or disavow a formerly held belief"},
+            {word: "abnegation", hint: "the denial and rejection of a doctrine or belief"},
+            {word: "abrogate", hint: "revoke formally"},
+            {word: "abscond", hint: "run away, often taking something or somebody along"},
+            {word: "abstruse", hint: "difficult to understand"},
+            {word: "accede", hint: "yield to another's wish or opinion"},
+            {word: "accost", hint: "approach and speak to someone aggressively or insistently"},
+            {word: "accretion", hint: "an increase by natural growth or addition"},
+            {word: "acumen", hint: "shrewdness shown by keen insight"},
+            {word: "adamant", hint: "impervious to pleas, persuasion, requests, or reason"},
+            {word: "admonish", hint: "scold or reprimand; take to task"},
+            {word: "adumbrate", hint: "describe roughly or give the main points or summary of"},
+            {word: "adverse", hint: "in an opposing direction"},
+            {word: "advocate", hint: "a person who pleads for a person, cause, or idea"},
+            {word: "affluent", hint: "having an abundant supply of money or possessions of value"},
+            {word: "aggrandize", hint: "embellish; increase the scope, power, or importance of"},
+            {word: "alacrity", hint: "liveliness and eagerness"},
+            {word: "alias", hint: "a name that has been assumed temporarily"},
+            {word: "ambivalent", hint: "uncertain or unable to decide about what course to follow"},
+            {word: "amenable", hint: "disposed or willing to comply"},
+            {word: "amorphous", hint: "having no definite form or distinct shape"},
+            {word: "anachronistic", hint: "chronologically misplaced"},
+            {word: "anathema", hint: "a formal ecclesiastical curse accompanied by excommunication"},
+            {word: "annex", hint: "attach to"},
+            {word: "antediluvian", hint: "of or relating to the period before the biblical flood"},
+            {word: "antiseptic", hint: "thoroughly clean and free of disease-causing organisms"},
+            {word: "apathetic", hint: "showing little or no emotion or animation"},
+            {word: "antithesis", hint: "exact opposite"},
+            {word: "apocryphal", hint: "being of questionable authenticity"},
+            {word: "approbation", hint: "official acceptance or agreement"},
+            {word: "arbitrary", hint: "based on or subject to individual discretion or preference"},
+            {word: "arboreal", hint: "of or relating to or formed by trees"},
+            {word: "arcane", hint: "requiring secret or mysterious knowledge"},
+            {word: "archetypal", hint: "of an original pattern on which other things are modeled"},
+            {word: "arrogate", hint: "seize and take control without authority"},
+            {word: "ascetic", hint: "someone who practices self denial as a spiritual discipline"},
+            {word: "aspersion", hint: "a disparaging remark"},
+            {word: "assiduous", hint: "marked by care and persistent effort"},
+            {word: "atrophy", hint: "a decrease in size of an organ caused by disease or disuse"},
+            {word: "bane", hint: "something causing misery or death"},
+            {word: "bashful", hint: "self-consciously timid"},
+            {word: "beguile", hint: "influence by slyness"},
+            {word: "bereft", hint: "lacking or deprived of something"},
+            {word: "blandishment", hint: "flattery intended to persuade"},
+            {word: "bilk", hint: "cheat somebody out of what is due, especially money"},
+            {word: "bombastic", hint: "ostentatiously lofty in style"},
+            {word: "cajole", hint: "influence or urge by gentle urging, caressing, or flattering"},
+            {word: "callous", hint: "emotionally hardened"},
+            {word: "calumny", hint: "a false accusation of an offense"},
+            {word: "camaraderie", hint: "the quality of affording easy familiarity and sociability"},
+            {word: "candor", hint: "the quality of being honest and straightforward"},
+            {word: "capitulate", hint: "surrender under agreed conditions"},
+            {word: "carouse", hint: "celebrate or enjoy something in a noisy or wild way"},
+            {word: "carp", hint: "any of various freshwater fish of the family Cyprinidae"},
+            {word: "caucus", hint: "meet to select a candidate or promote a policy"},
+            {word: "cavort", hint: "play boisterously"},
+            {word: "circumlocution", hint: "an indirect way of expressing something"},
+            {word: "circumscribe", hint: "draw a geometric figure around another figure"},
+            {word: "circumvent", hint: "surround so as to force to give up"},
+            {word: "clamor", hint: "utter or proclaim insistently and noisily"},
+            {word: "cleave", hint: "separate or cut with a tool, such as a sharp instrument"},
+            {word: "cobbler", hint: "a person who makes or repairs shoes"},
+            {word: "cogent", hint: "powerfully persuasive"},
+            {word: "cognizant", hint: "having or showing knowledge or understanding or realization"},
+            {word: "commensurate", hint: "corresponding in size or degree or extent"},
+            {word: "complement", hint: "something added to embellish or make perfect"},
+            {word: "compunction", hint: "a feeling of deep regret, usually for some misdeed"},
+            {word: "concomitant", hint: "following or accompanying as a consequence"},
+            {word: "conduit", hint: "a passage through which water or electric wires can pass"},
+            {word: "conflagration", hint: "a very intense and uncontrolled fire"},
+            {word: "congruity", hint: "the quality of agreeing; being suitable and appropriate"},
+            {word: "connive", hint: "form intrigues (for) in an underhand manner"},
+            {word: "consign", hint: "give over to another for care or safekeeping"},
+            {word: "constituent", hint: "one of the individual parts making up a composite entity"},
+            {word: "construe", hint: "make sense of; assign a meaning to"},
+            {word: "contusion", hint: "an injury in which the skin is not broken"},
+            {word: "contrite", hint: "feeling or expressing pain or sorrow"},
+            {word: "contentious", hint: "showing an inclination to disagree"},
+            {word: "contravene", hint: "go against, as of rules and laws"},
+            {word: "convivial", hint: "occupied with or fond of the pleasures of good company"},
+            {word: "corpulence", hint: "the property of excessive fatness"},
+            {word: "covet", hint: "wish, long, or crave for"},
+            {word: "cupidity", hint: "extreme greed for material wealth"},
+            {word: "dearth", hint: "an insufficient quantity or number"},
+            {word: "debacle", hint: "a sudden and complete disaster"},
+            {word: "debauch", hint: "a wild gathering"},
+            {word: "debunk", hint: "expose while ridiculing"},
+            {word: "defunct", hint: "no longer in force or use; inactive"},
+            {word: "demagogue", hint: "a leader who seeks support by appealing to popular passions"},
+            {word: "denigrate", hint: "attack the good name and reputation of someone"},
+            {word: "derivative", hint: "a compound obtained from another compound"},
+            {word: "despot", hint: "a cruel and oppressive dictator"},
+            {word: "diaphanous", hint: "so thin as to transmit light"},
+            {word: "didactic", hint: "instructive, especially excessively"},
+            {word: "dirge", hint: "a song or hymn of mourning as a memorial to a dead person"},
+            {word: "disaffected", hint: "discontented as toward authority"},
+            {word: "discomfit", hint: "cause to lose one's composure"},
+            {word: "disparate", hint: "fundamentally different or distinct in quality or kind"},
+            {word: "dispel", hint: "cause to separate and go in different directions"},
+            {word: "disrepute", hint: "the state of being held in low esteem"},
+            {word: "divisive", hint: "causing or characterized by disagreement or disunity"},
+            {word: "dogmatic", hint: "pertaining to a code of beliefs accepted as authoritative"},
+            {word: "dour", hint: "showing a brooding ill humor"},
+            {word: "duplicity", hint: "the act of deceiving or acting in bad faith"},
+            {word: "duress", hint: "compulsory force or threat"},
+            {word: "eclectic", hint: "selecting what seems best of various styles or ideas"},
+            {word: "edict", hint: "a formal or authoritative proclamation"},
+            {word: "ebullient", hint: "joyously unrestrained"},
+            {word: "egregious", hint: "conspicuously and outrageously bad or reprehensible"},
+            {word: "elegy", hint: "a mournful poem; a lament for the dead"},
+            {word: "elicit", hint: "call forth, as an emotion, feeling, or response"},
+            {word: "embezzlement", hint: "the fraudulent appropriation of funds or property"},
+            {word: "emend", hint: "make corrections to"},
+            {word: "emollient", hint: "a substance with a soothing effect when applied to the skin"},
+            {word: "empirical", hint: "derived from experiment and observation rather than theory"},
+            {word: "emulate", hint: "strive to equal or match, especially by imitating"},
+            {word: "enervate", hint: "weaken physically, mentally, or morally"},
+            {word: "enfranchise", hint: "grant freedom to, as from slavery or servitude"},
+            {word: "engender", hint: "call forth"},
+            {word: "ephemeral", hint: "anything short-lived, as an insect that lives only for a day"},
+            {word: "epistolary", hint: "written in the form of letters or correspondence"},
+            {word: "equanimity", hint: "steadiness of mind under stress"},
+            {word: "equivocal", hint: "open to two or more interpretations"},
+            {word: "espouse", hint: "choose and follow a theory, idea, policy, etc."},
+            {word: "evanescent", hint: "short-lived; tending to vanish or disappear"},
+            {word: "evince", hint: "give expression to"},
+            {word: "exacerbate", hint: "make worse"},
+            {word: "exhort", hint: "spur on or encourage especially by cheers and shouts"},
+            {word: "execrable", hint: "unequivocally detestable"},
+            {word: "exigent", hint: "demanding immediate attention"},
+            {word: "expedient", hint: "appropriate to a purpose"},
+            {word: "expiate", hint: "make amends for"},
+            {word: "expunge", hint: "remove by erasing or crossing out or as if by drawing a line"},
+            {word: "extraneous", hint: "not belonging to that in which it is contained"},
+            {word: "extol", hint: "praise, glorify, or honor"},
+            {word: "extant", hint: "still in existence; not extinct or destroyed or lost"},
+            {word: "expurgate", hint: "edit by omitting or modifying parts considered indelicate"},
+            {word: "fallacious", hint: "containing or based on incorrect reasoning"},
+            {word: "fatuous", hint: "devoid of intelligence"},
+            {word: "fetter", hint: "a shackle for the ankles or feet"},
+            {word: "flagrant", hint: "conspicuously and outrageously bad or reprehensible"},
+            {word: "foil", hint: "hinder or prevent, as an effort, plan, or desire"},
+            {word: "forbearance", hint: "good-natured tolerance of delay or incompetence"},
+            {word: "fortuitous", hint: "lucky; occurring by happy chance"},
+            {word: "fractious", hint: "easily irritated or annoyed"},
+            {word: "garrulous", hint: "full of trivial conversation"},
+            {word: "gourmand", hint: "a person who is devoted to eating and drinking to excess"},
+            {word: "grandiloquent", hint: "lofty in style"},
+            {word: "gratuitous", hint: "unnecessary and unwarranted"},
+            {word: "hapless", hint: "unfortunate and deserving pity"},
+            {word: "hegemony", hint: "the dominance or leadership of one social group over others"},
+            {word: "heterogenous", hint: "consisting of elements that are not of the same kind"},
+            {word: "iconoclast", hint: "someone who attacks cherished ideas or institutions"},
+            {word: "idiosyncratic", hint: "peculiar to the individual"},
+            {word: "impecunious", hint: "not having enough money to pay for necessities"},
+            {word: "impetuous", hint: "characterized by undue haste and lack of thought"},
+            {word: "impinge", hint: "infringe upon"},
+            {word: "impute", hint: "attribute or credit to"},
+            {word: "inane", hint: "devoid of intelligence"},
+            {word: "inchoate", hint: "only partly in existence; imperfectly formed"},
+            {word: "incontrovertible", hint: "impossible to deny or disprove"},
+            {word: "incumbent", hint: "necessary as a duty or responsibility; morally binding"},
+            {word: "inexorable", hint: "impossible to prevent, resist, or stop"},
+            {word: "inimical", hint: "tending to obstruct or cause harm"},
+            {word: "injunction", hint: "a judicial remedy to prohibit a party from doing something"},
+            {word: "inoculate", hint: "inject or treat with the germ of a disease to render immune"},
+            {word: "insidious", hint: "working or spreading in a hidden and usually injurious way"},
+            {word: "instigate", hint: "provoke or stir up"},
+            {word: "insurgent", hint: "in opposition to a civil authority or government"},
+            {word: "interlocutor", hint: "a person who takes part in a conversation"},
+            {word: "intimation", hint: "a slight suggestion or vague understanding"},
+            {word: "inure", hint: "cause to accept or become hardened to"},
+            {word: "invective", hint: "abusive language used to express blame or censure"},
+            {word: "intransigent", hint: "impervious to pleas, persuasion, requests, or reason"},
+            {word: "inveterate", hint: "habitual"},
+            {word: "irreverence", hint: "a mental attitude showing lack of due respect"},
+            {word: "knell", hint: "the sound of a bell rung slowly to announce a death"},
+            {word: "laconic", hint: "brief and to the point"},
+            {word: "largesse", hint: "liberality in bestowing gifts"},
+            {word: "legerdemain", hint: "an illusory feat"},
+            {word: "libertarian", hint: "an advocate of freedom of thought and speech"},
+            {word: "licentious", hint: "lacking moral discipline"},
+            {word: "linchpin", hint: "a central cohesive source of support and stability"},
+            {word: "litigant", hint: "a party to a lawsuit"},
+            {word: "maelstrom", hint: "a powerful circular current of water"},
+            {word: "maudlin", hint: "very sentimental or emotional"},
+            {word: "maverick", hint: "someone who exhibits independence in thought and action"},
+            {word: "mawkish", hint: "very sentimental or emotional"},
+            {word: "maxim", hint: "a saying that is widely accepted on its own merits"},
+            {word: "mendacious", hint: "given to lying"},
+            {word: "modicum", hint: "a small or moderate or token amount"},
+            {word: "morass", hint: "a soft wet area of low-lying land that sinks underfoot"},
+            {word: "mores", hint: "the conventions embodying the fundamental values of a group"},
+            {word: "munificent", hint: "very generous"},
+            {word: "multifarious", hint: "having many aspects"},
+            {word: "nadir", hint: "the lowest point of anything"},
+            {word: "negligent", hint: "characterized by undue lack of attention or concern"},
+            {word: "neophyte", hint: "a participant with no experience with an activity"},
+            {word: "noxious", hint: "injurious to physical or mental health"},
+            {word: "obdurate", hint: "stubbornly persistent in wrongdoing"},
+            {word: "obfuscate", hint: "make obscure or unclear"},
+            {word: "obstreperous", hint: "noisily and stubbornly defiant"},
+            {word: "officious", hint: "intrusive in a meddling or offensive manner"},
+            {word: "onerous", hint: "burdensome or difficult to endure"},
+            {word: "ostensible", hint: "appearing as such but not necessarily so"},
+            {word: "ostracism", hint: "the act of excluding someone from society by general consent"},
+            {word: "palliate", hint: "lessen or to try to lessen the seriousness or extent of"},
+            {word: "panacea", hint: "hypothetical remedy for all ills or diseases"},
+            {word: "paradigm", hint: "a standard or typical example"},
+            {word: "pariah", hint: "a person who is rejected from society or home"},
+            {word: "partisan", hint: "a fervent and even militant proponent of something"},
+            {word: "paucity", hint: "an insufficient quantity or number"},
+            {word: "pejorative", hint: "expressing disapproval"},
+            {word: "pellucid", hint: "transparently clear; easily understandable"},
+            {word: "penchant", hint: "a strong liking or preference"},
+            {word: "penurious", hint: "excessively unwilling to spend"},
+            {word: "pert", hint: "characterized by a lightly saucy or impudent quality"},
+            {word: "pernicious", hint: "exceedingly harmful"},
+            {word: "pertinacious", hint: "stubbornly unyielding"},
+            {word: "phlegmatic", hint: "showing little emotion"},
+            {word: "philanthropic", hint: "of or relating to charitable giving"},
+            {word: "pithy", hint: "concise and full of meaning"},
+            {word: "platitude", hint: "a trite or obvious remark"},
+            {word: "plaudit", hint: "enthusiastic approval"},
+            {word: "plenitude", hint: "a full supply"},
+            {word: "plethora", hint: "extreme excess"},
+            {word: "portent", hint: "a sign of something about to happen"},
+            {word: "potentate", hint: "a powerful ruler, especially one who is unconstrained by law"},
+            {word: "preclude", hint: "make impossible, especially beforehand"},
+            {word: "predilection", hint: "a predisposition in favor of something"},
+            {word: "preponderance", hint: "exceeding in heaviness; having greater weight"},
+            {word: "presage", hint: "a foreboding about what is about to happen"},
+            {word: "probity", hint: "complete and confirmed integrity"},
+            {word: "proclivity", hint: "a natural inclination"},
+            {word: "profligate", hint: "unrestrained by convention or morality"},
+            {word: "promulgate", hint: "state or announce"},
+            {word: "proscribe", hint: "command against"},
+            {word: "protean", hint: "taking on different forms"},
+            {word: "prurient", hint: "characterized by lust"},
+            {word: "puerile", hint: "displaying or suggesting a lack of maturity"},
+            {word: "pugnacious", hint: "ready and able to resort to force or violence"},
+            {word: "pulchritude", hint: "physical beauty, especially of a woman"},
+            {word: "punctilious", hint: "marked by precise accordance with details"},
+            {word: "quaint", hint: "attractively old-fashioned"},
+            {word: "quixotic", hint: "not sensible about practical matters"},
+            {word: "quandary", hint: "state of uncertainty in a choice between unfavorable options"},
+            {word: "recalcitrant", hint: "stubbornly resistant to authority or control"},
+            {word: "redoubtable", hint: "inspiring fear"},
+            {word: "relegate", hint: "assign to a lower position"},
+            {word: "remiss", hint: "failing in what duty requires"},
+            {word: "reprieve", hint: "postpone the punishment of a convicted criminal"},
+            {word: "reprobate", hint: "a person without moral scruples"},
+            {word: "rescind", hint: "cancel officially"},
+            {word: "requisition", hint: "an authoritative demand"},
+            {word: "rife", hint: "excessively abundant"},
+            {word: "sanctimonious", hint: "excessively or hypocritically pious"},
+            {word: "sanguine", hint: "confidently optimistic and cheerful"},
+            {word: "scurrilous", hint: "expressing offensive, insulting, or scandalous criticism"},
+            {word: "semaphore", hint: "an apparatus for visual signaling"},
+            {word: "serendipity", hint: "good luck in making unexpected and fortunate discoveries"},
+            {word: "sobriety", hint: "the state of being unaffected or not intoxicated by alcohol"},
+            {word: "solicitous", hint: "full of anxiety and concern"},
+            {word: "solipsism", hint: "the philosophical theory that the self is all that exists"},
+            {word: "spurious", hint: "plausible but false"},
+            {word: "staid", hint: "characterized by dignity and propriety"},
+            {word: "stolid", hint: "having or revealing little emotion or sensibility"},
+            {word: "subjugate", hint: "make subservient; force to submit or subdue"},
+            {word: "surfeit", hint: "indulge (one's appetite) to satiety"},
+            {word: "surreptitious", hint: "marked by quiet and caution and secrecy"},
+            {word: "swarthy", hint: "naturally having skin of a dark color"},
+            {word: "tangential", hint: "of superficial relevance if any"},
+            {word: "tome", hint: "a large and scholarly book"},
+            {word: "toady", hint: "a person who tries to please someone to gain an advantage"},
+            {word: "torpid", hint: "in a condition of biological rest or suspended animation"},
+            {word: "travesty", hint: "a composition that imitates or misrepresents a style"},
+            {word: "trenchant", hint: "having keenness and forcefulness and penetration in thought"},
+            {word: "trite", hint: "repeated too often; overfamiliar through overuse"},
+            {word: "truculent", hint: "defiantly aggressive"},
+            {word: "turpitude", hint: "a corrupt or depraved or degenerate act or practice"},
+            {word: "ubiquitous", hint: "being present everywhere at once"},
+            {word: "umbrage", hint: "a feeling of anger caused by being offended"},
+            {word: "upbraid", hint: "express criticism towards"},
+            {word: "utilitarian", hint: "having a useful function"},
+            {word: "veracity", hint: "unwillingness to tell lies"},
+            {word: "vestige", hint: "an indication that something has been present"},
+            {word: "vicissitude", hint: "a variation in circumstances or fortune"},
+            {word: "vilify", hint: "spread negative information about"},
+            {word: "virtuoso", hint: "someone who is dazzlingly skilled in any field"},
+            {word: "vitriolic", hint: "harsh, bitter, or malicious in tone"},
+            {word: "vituperate", hint: "spread negative information about"},
+            {word: "vociferous", hint: "conspicuously and offensively loud"},
+            {word: "wanton", hint: "a lewd or immoral person"},
+            {word: "winsome", hint: "charming in a childlike or naive way"},
+            {word: "yoke", hint: "join with stable gear, as two draft animals"},
+            {word: "zephyr", hint: "a slight wind"},
+            {word: "wily", hint: "marked by skill in deception"},
+            {word: "tirade", hint: "a speech of violent denunciation"}
+        ];
+
+        let currentWord;
+        let score = 0;
+
+        function newWord() {
+            const index = Math.floor(Math.random() * vocabulary.length);
+            currentWord = vocabulary[index];
+            document.getElementById('hint').textContent = `Hint: ${currentWord.hint}`;
+            document.getElementById('guess').value = '';
+            document.getElementById('feedback').textContent = '';
+        }
+
+        function checkGuess() {
+            const guess = document.getElementById('guess').value.toLowerCase();
+            if (guess === currentWord.word.toLowerCase()) {
+                document.getElementById('feedback').textContent = 'Correct!';
+                score++;
+                document.getElementById('score').textContent = `Score: ${score}`;
+            } else {
+                document.getElementById('feedback').textContent = `Wrong! The word was ${currentWord.word}`;
+            }
+        }
+
+        newWord();
+    </script>
+</body>
+</html>
